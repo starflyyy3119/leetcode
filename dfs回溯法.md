@@ -365,3 +365,64 @@ class Solution {
     }
 }
 ```
+
+[46. 全排列](https://leetcode-cn.com/problems/permutations/submissions/)
+```Java
+class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>(); 
+        boolean[] st = new boolean[nums.length];
+
+        dfs(res, path, nums, st, 0);
+        return res;
+    }
+    private static void dfs(List<List<Integer>> res, List<Integer> path, int[] nums, boolean[] st, int u) {
+        if (u == nums.length) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if (!st[i]) {
+                st[i] = true;
+                path.add(nums[i]);
+                dfs(res, path, nums, st, u + 1);
+                path.remove(path.size() - 1);
+                st[i] = false;
+            }
+        }
+    } 
+}
+```
+
+[47.全排列II](https://leetcode-cn.com/problems/permutations-ii/submissions/)
+```Java
+class Solution {
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        boolean[] st = new boolean[nums.length];
+        Arrays.sort(nums);
+
+        dfs(res, path, st, nums, 0);
+        return res;
+    }
+    private static void dfs(List<List<Integer>> res, List<Integer> path, boolean[] st, int[] nums, int u) {
+        if (u == nums.length) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if (!st[i]) {
+                if (i > 0 && nums[i] == nums[i - 1] && !st[i - 1]) continue; // 注意这里去重的时候和子集的区别
+
+                st[i] = true;
+                path.add(nums[i]);
+                dfs(res, path, st, nums, u + 1);
+                path.remove(path.size() - 1);
+                st[i] = false;
+            }
+        }
+    }
+}
+```
