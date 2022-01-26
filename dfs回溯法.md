@@ -324,3 +324,44 @@ class Solution {
 ```
 
 ## 子集
+[78. 子集](https://leetcode-cn.com/problems/subsets/submissions/)
+```Java
+class Solution {
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        dfs(res, path, nums, 0);
+        return res;
+    }
+    private static void dfs(List<List<Integer>> res , List<Integer> path, int[] nums, int begin) {
+        res.add(new ArrayList<>(path));
+        for (int i = begin; i < nums.length; i++) {
+            path.add(nums[i]);
+            dfs(res, path, nums, i + 1);
+            path.remove(path.size() - 1);
+        }
+    }
+}
+```
+
+[90. 子集II](https://leetcode-cn.com/problems/subsets-ii/)
+```Java
+class Solution {
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        Arrays.sort(nums); // 需要去重的时候必须有序
+        dfs(res, path, nums, 0);
+        return res;
+    }
+    private static void dfs(List<List<Integer>> res , List<Integer> path, int[] nums, int begin) {
+        res.add(new ArrayList<>(path));
+        for (int i = begin; i < nums.length; i++) {
+            if (i > begin && nums[i] == nums[i - 1]) continue; // 经典去重语句
+            path.add(nums[i]);
+            dfs(res, path, nums, i + 1);
+            path.remove(path.size() - 1);
+        }
+    }
+}
+```
