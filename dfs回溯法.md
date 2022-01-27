@@ -426,3 +426,91 @@ class Solution {
     }
 }
 ```
+## 棋盘
+[37. 解数独](https://leetcode-cn.com/problems/sudoku-solver/)
+```Java
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    private int[] row = new int[9], col = new int[9];
+    private int[][] block = new int[3][3];
+
+    public void solveSudoku(char[][] board) {
+        int cnt = 0;
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] == '.') cnt++;
+                else fill(i, j, board[i][j] - '1', true);
+            }
+        }
+        int[] pos = findNextPos(board, 0);
+        dfs(board, cnt, pos[0], pos[1]);
+    }
+    // dfs 这里带布尔值返回值, 原因是搜到 true 后一路绿灯，不需要再执行撤销语句了
+    private boolean dfs(char[][] board, int cnt, int x, int y) {
+        if (cnt == 0) return true;
+
+        List<Integer> candidates = findCandidates(x, y);
+        if (candidates.isEmpty()) return false;
+
+        for (int val : candidates) {
+            fill(x, y, val, true);
+            board[x][y] = (char) (49 + val);
+
+            int[] pos = findNextPos(board, x);
+
+            boolean flag = dfs(board, cnt - 1, pos[0], pos[1]);
+            if (flag) return true;
+
+            board[x][y] = '.';
+            fill(x, y, val, false);
+        }
+        // 搜索完一支后还没有出现 true 说明当前支没有找到答案，返回 false
+        return false;
+    }
+
+    private void fill(int x, int y, int val, boolean flag) {
+        row[x] = flag ? row[x] | (1 << val) : row[x] ^ (1 << val);
+        col[y] = flag ? col[y] | (1 << val) : col[y] ^ (1 << val);
+        block[x / 3][y / 3] = flag ? block[x / 3][y / 3] | (1 << val) : block[x / 3][y / 3] ^ (1 << val);
+    }
+
+    private List<Integer> findCandidates(int x, int y) {
+        int mask = row[x] | col[y] | block[x / 3][y / 3];
+        List<Integer> l = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            if (((mask >> i) & 1) == 0) l.add(i);
+        }
+        return l;
+    }
+
+    private int[] findNextPos(char[][] board, int x) {
+        for (int i = x; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] == '.') return new int[]{i, j};
+            }
+        }
+        return new int[]{-1, -1};
+    }
+}
+
+```
+
+- 这个题目非常巧妙的使用了二进制优化，将 1 ~ 9 的数字表示成 $2^j$ 的形式。
+- row[i] 中存的是第 $i$ 行所有数的**二进制**表示的和。
+    - 如实例中第一行有 5，3，7，那么 $\text{row[0]} = 2^4 + 2^2 + 2^6 = 84$，二进制形式为 1010100。
+    - 如此的好处在于方便的表示**当前行哪些数字已经选了**。
+- 同理: col[i] 中存的是第 $i$ 列所有数的**二进制**表示的和；block[i][j] 中存的是**第 i 大行，j 大列**的**宫内**的所有数的**二进制**表示的和。
+
+![](./fig/nine.png)
+
+- fill 函数:
+    - ```Java row[x] | (1 << val) ``` (val = 0, 1, 2 ... 8) 表示将 row[x] 的 val 位变成 1。
+    - ```Java row[x] ^ (1 << val) ``` 表示将 row[x] 的 val 位变成 0。
+    - 如此实现了 dfs 中需要的 **添加** 和 **撤销** 操作。
+
+- findCandidates 函数:
+    - ```Java int mask = row[x] | col[y] | block[x / 3][y / 3];``` 这句话的意思就是将该位置的**行，列，还有宫内**已经存在的元素筛选出来。其中如果某个位置为 0， 就意味着当前位置所对应的元素还可以作为 candidates 进行搜索。
+- 更进一步的优化，还可以每次选择**限制最多的格子**进行填数，减少试错成本。
+
