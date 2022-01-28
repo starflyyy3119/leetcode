@@ -514,3 +514,56 @@ class Solution {
     - ```Java int mask = row[x] | col[y] | block[x / 3][y / 3];``` 这句话的意思就是将该位置的**行，列，还有宫内**已经存在的元素筛选出来。其中如果某个位置为 0， 就意味着当前位置所对应的元素还可以作为 candidates 进行搜索。
 - 更进一步的优化，还可以每次选择**限制最多的格子**进行填数，减少试错成本。
 
+[51. n皇后](https://leetcode-cn.com/problems/n-queens/)
+```Java
+class Solution {
+    // col[i] 表示第 i 列是否被选中， dg[i] 表示第 i 个对角线是否被选中， udg[i] 表示第 i 个反对角线是否被选中
+    private boolean[] col, dg, udg;
+    private int nn;
+    public List<List<String>> solveNQueens(int n) {
+        nn = n;
+        col = new boolean[n];
+        dg = new boolean[2 * n];
+        udg = new boolean[2 * n];
+
+        List<List<String>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        dfs(res, path, 0);
+        return res;
+    }
+    private void dfs(List<List<String>> res, List<Integer> path, int u) {
+        if (u == nn) {
+            res.add(generateBoard(path));
+            return;
+        }
+        for (int i = 0; i < nn; i++) {
+            if (!col[i] && !dg[nn + i - u] && !udg[i + u]) {
+                col[i] = dg[nn + i - u] = udg[i + u] = true;
+                path.add(i);
+                dfs(res, path, u + 1);
+                path.remove(path.size() - 1);
+                col[i] = dg[nn + i - u] = udg[i + u] = false;
+            }
+        }
+    }
+
+    private List<String> generateBoard(List<Integer> path) {
+        List<String> res = new ArrayList<>();
+        StringBuilder sb;
+        for (int col : path) {
+            sb = new StringBuilder();
+            for (int j = 0; j < nn; j++) {
+                if (j == col) sb.append('Q');
+                else sb.append('.');
+            }
+            res.add(sb.toString());
+        }
+        return res;
+    }
+
+}
+```
+![](./fig/nqueen.png)
+
+- 思路: 类似全排列，我们有 n 个位置(编号为 0 ～ n - 1)。 **每个位置代表一行**，我们需要**为每一个位置选择一个列**。如此可以保证任意两个皇后不在同一行，同一列。进一步，为了保证任意两个皇后不在同一对角线上，我们需要维持 $\color{red} dg$ 以及 $\color{blue} udg$。当行号 u, 列号 i 确定后，由于红色线的方程是 $i = -u + b$, 我们得到 $b = i + u$，即为 $\color{red} dg$ 的序号；蓝色线的方程是 $i = u + b$, 为了避免序号为负，我们得到 $\color{blue} udg$ 的序号为 $b = i - u + n$。
+
