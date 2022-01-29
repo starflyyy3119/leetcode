@@ -1,62 +1,4 @@
 # DFS 回溯法
-[2151. 基于陈述统计最多好人数](https://leetcode-cn.com/problems/maximum-good-people-based-on-statements/submissions/)
-
-```Java
-import java.util.Arrays;
-
-class Solution {
-    private static int n;
-    private static int res;
-
-    public int maximumGood(int[][] statements) {
-        n = statements.length;
-        res = 0;
-
-        int[] path = new int[n];
-        Arrays.fill(path, 2);
-        dfs(statements, path, 0);
-        return res;
-    }
-
-    // 搜索第 u 个位置, path[u] 是前面的好人对 u 的论断
-    private static void dfs(int[][] statements, int[] path, int u) {
-        // 这里为什么使用 pathCopy 呢，因为 dfs 完成后需要恢复现场，用pathCopy 可以不改变 path 本身，免去恢复现场这个步骤
-        int[] pathCopy = Arrays.copyOf(path, path.length);
-        if (u == n) {
-            res = Math.max(res, numOfGood(pathCopy));
-            return;
-        }
-        if (pathCopy[u] == 0) {
-            // 坏人的论断不用管
-            dfs(statements, pathCopy, u + 1);
-        } else if (pathCopy[u] == 1) {
-            // 需要判断该好人的论断是否与前面的好人的论断有矛盾
-            for (int j = 0; j < n; j++) {
-                if (statements[u][j] != 2 && pathCopy[j] != 2 && statements[u][j] != pathCopy[j]) return;
-                if (statements[u][j] != 2 && pathCopy[j] == 2) pathCopy[j] = statements[u][j];
-            }
-            dfs(statements, pathCopy, u + 1);
-        } else { // path[u] == 2
-            // 他可以是好人
-            pathCopy[u] = 1;
-            dfs(statements, pathCopy, u);
-            // 也可以是坏人
-            pathCopy[u] = 0;
-            dfs(statements, pathCopy, u + 1);
-        }
-    }
-
-    private static int numOfGood(int[] path) {
-        int cnt = 0;
-        for (int j = 0; j < n; j++) {
-            if (path[j] == 1) cnt++;
-        }
-        return cnt;
-    }
-}
-```
-- 回溯法一条路走到头后是一定要恢复进入该层 dfs 函数之前的状态的，本题目在原 path 数组上面恢复非常困难，所以直接 copy 一个新的 path，这样就可以避免这个问题。
-
 ## 组合
 [77.组合](https://leetcode-cn.com/problems/combinations/)
 
@@ -567,3 +509,97 @@ class Solution {
 
 - 思路: 类似全排列，我们有 n 个位置(编号为 0 ～ n - 1)。 **每个位置代表一行**，我们需要**为每一个位置选择一个列**。如此可以保证任意两个皇后不在同一行，同一列。进一步，为了保证任意两个皇后不在同一对角线上，我们需要维持 $\color{red} dg$ 以及 $\color{blue} udg$。当行号 u, 列号 i 确定后，由于红色线的方程是 $i = -u + b$, 我们得到 $b = i + u$，即为 $\color{red} dg$ 的序号；蓝色线的方程是 $i = u + b$, 为了避免序号为负，我们得到 $\color{blue} udg$ 的序号为 $b = i - u + n$。
 
+## 其他
+[491. 递增子序列](https://leetcode-cn.com/problems/increasing-subsequences/)
+```Java
+class Solution {
+    public List<List<Integer>> findSubsequences(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+
+        dfs(res, path, nums, 0);
+        return res;
+    }
+    private void dfs(List<List<Integer>> res, List<Integer> path, int[] nums, int begin) {
+        if (path.size() >= 2) {
+            res.add(new ArrayList<>(path));
+        }
+
+        // 这里使用 hashset 辅助我们去重, 如 [4, 6, 7, 8, 7]
+        // 如果不去重的话答案中会出现两个 [4, 6, 7]，所以我们需要知道的是在深度优先搜索树的同一层中，当前的元素是否在
+        // 之前出现过。而以 O(1) 的时间获取原来出现过元素的方法就是 HashSet。 
+        Set<Integer> s = new HashSet<>();
+        for (int i = begin; i < nums.length; i++) {
+            if (s.contains(nums[i])) continue;  // 去重
+            if (path.size() == 0 || nums[i] >= path.get(path.size() - 1)) { // 保持递增
+                s.add(nums[i]);
+                path.add(nums[i]);
+                dfs(res, path, nums, i + 1);
+                path.remove(path.size() - 1);
+            } 
+        }
+    }
+}
+```
+
+[2151. 基于陈述统计最多好人数](https://leetcode-cn.com/problems/maximum-good-people-based-on-statements/submissions/)
+
+```Java
+import java.util.Arrays;
+
+class Solution {
+    private static int n;
+    private static int res;
+
+    public int maximumGood(int[][] statements) {
+        n = statements.length;
+        res = 0;
+
+        int[] path = new int[n];
+        Arrays.fill(path, 2);
+        dfs(statements, path, 0);
+        return res;
+    }
+
+    // 搜索第 u 个位置, path[u] 是前面的好人对 u 的论断
+    private static void dfs(int[][] statements, int[] path, int u) {
+        // 这里为什么使用 pathCopy 呢，因为 dfs 完成后需要恢复现场，用pathCopy 可以不改变 path 本身，免去恢复现场这个步骤
+        int[] pathCopy = Arrays.copyOf(path, path.length);
+        if (u == n) {
+            res = Math.max(res, numOfGood(pathCopy));
+            return;
+        }
+        if (pathCopy[u] == 0) {
+            // 坏人的论断不用管
+            dfs(statements, pathCopy, u + 1);
+        } else if (pathCopy[u] == 1) {
+            // 需要判断该好人的论断是否与前面的好人的论断有矛盾
+            for (int j = 0; j < n; j++) {
+                if (statements[u][j] != 2 && pathCopy[j] != 2 && statements[u][j] != pathCopy[j]) return;
+                if (statements[u][j] != 2 && pathCopy[j] == 2) pathCopy[j] = statements[u][j];
+            }
+            dfs(statements, pathCopy, u + 1);
+        } else { // path[u] == 2
+            // 他可以是好人
+            pathCopy[u] = 1;
+            dfs(statements, pathCopy, u);
+            // 也可以是坏人
+            pathCopy[u] = 0;
+            dfs(statements, pathCopy, u + 1);
+        }
+    }
+
+    private static int numOfGood(int[] path) {
+        int cnt = 0;
+        for (int j = 0; j < n; j++) {
+            if (path[j] == 1) cnt++;
+        }
+        return cnt;
+    }
+}
+```
+- 回溯法一条路走到头后是一定要恢复进入该层 dfs 函数之前的状态的，本题目在原 path 数组上面恢复非常困难，所以直接 copy 一个新的 path，这样就可以避免这个问题。
+
+[332.重新安排行程](https://leetcode-cn.com/problems/reconstruct-itinerary/solution/zhong-xin-an-pai-xing-cheng-by-leetcode-solution/)
+
+- 欧拉回路: 挖坑
