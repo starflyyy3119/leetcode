@@ -255,3 +255,159 @@ public class Main{
     }
 }
 ```
+
+[HJ29 字符串加解密](https://www.nowcoder.com/practice/2aa32b378a024755a3f251e75cbf233a?tpId=37&tqId=21252&rp=1&ru=/exam/oj/ta&qru=/exam/oj/ta&sourceUrl=%2Fexam%2Foj%2Fta%3FtpId%3D37%26type%3D37%26page%3D1%26difficulty%3D3&difficulty=3&judgeStatus=undefined&tags=&title=)
+```Java
+import java.io.*;
+import java.util.*;
+public class Main{
+    public static String L1 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    public static String L2 = "BCDEFGHIJKLMNOPQRSTUVWXYZAbcdefghijklmnopqrstuvwxyza1234567890";
+    public static void main(String[] args) {
+        Scanner in = new Scanner(new BufferedInputStream(System.in));
+        while (in.hasNext()) {
+            String toEncode = in.next();
+            String toDecode = in.next();
+            System.out.println(encode(toEncode));
+            System.out.println(decode(toDecode));
+        }
+    }
+    private static String encode(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (char c: s.toCharArray()) {
+            sb.append(L2.charAt(L1.indexOf(c)));
+        }
+        return sb.toString();
+    }
+    private static String decode(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (char c: s.toCharArray()) {
+            sb.append(L1.charAt(L2.indexOf(c)));
+        }
+        return sb.toString();
+    }
+}
+```
+
+[HJ32 密码截取]()
+```Java
+import java.io.*;
+import java.util.*;
+public class Main{
+    public static void main(String[] args) {
+        Scanner in = new Scanner(new BufferedInputStream(System.in));
+        while(in.hasNext()) {
+            String s = in.next();
+            System.out.println(maxPalindrome(s));
+        }
+    }
+    private static int maxPalindrome(String s) {
+        int res = 1;
+        boolean[][] f = new boolean[s.length()][s.length()];
+        for (int i = s.length() - 1; i >= 0; i--) {
+            for (int j = i; j < s.length(); j++) {
+                if (i == j) f[i][j] = true;
+                else if (j - i == 1 && s.charAt(i) == s.charAt(j)) {
+                    f[i][j] = true;
+                    res = Math.max(res, 2);
+                } else { // j - i > 1
+                    if (s.charAt(i) == s.charAt(j) && f[i + 1][j - 1]) {
+                        f[i][j] = true;
+                        res = Math.max(res, j - i + 1);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+}
+```
+- 本题目原型 [647. 回文子串](https://leetcode-cn.com/problems/palindromic-substrings/)。
+- 难点: 
+    - f[i][j] 定义为 **s[i ~ j] 是否是回文串**，如此**也不需要多开辟数组**。
+        - i == j : f[i][j] = true;
+        - j - i == 1: 检查 s[i] 是否等于 s[j]
+        - j - i > 1: 检查 s[i] 与 s[j] 以及 f[i + 1][j - 1]
+    - 由于求 f[i][j] 的时候需要 f[i + 1][j - 1], 所以**从下到上，从左到右**遍历。
+
+[HJ41 称砝码](https://www.nowcoder.com/practice/f9a4c19050fc477e9e27eb75f3bfd49c?tpId=37&tqId=21264&rp=1&ru=/exam/oj/ta&qru=/exam/oj/ta&sourceUrl=%2Fexam%2Foj%2Fta%3FtpId%3D37%26type%3D37%26page%3D1%26difficulty%3D3&difficulty=3&judgeStatus=undefined&tags=&title=)
+```Java
+import java.io.*;
+import java.util.*;
+public class Main{
+    public static void main(String[] args) {
+        Scanner in = new Scanner(new BufferedInputStream(System.in));
+        while (in.hasNext()) {
+            int n = in.nextInt();
+            int[] m = new int[n];
+            int[] x = new int[n];
+            for (int i = 0; i < n; i++) {
+                m[i] = in.nextInt();
+            } 
+            for (int i = 0; i < n; i++) {
+                x[i] = in.nextInt();
+            }
+            System.out.println(compute(m, x));
+        }
+    }
+    private static int compute(int[] m, int[] x) {
+        Set<Integer> set = new HashSet<>();
+        set.add(0);
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 1; j <= x[i]; j++) {
+                List<Integer> ll = new ArrayList<>();
+                ll.addAll(set);
+                for (int l : ll) {
+                    set.add(l + m[i]);
+                }
+            }
+        }
+        return set.size();
+    }
+}
+```
+- 用**哈希表**，每次往里面加砝码就可以了。
+
+[HJ107 求解立方根](https://www.nowcoder.com/practice/caf35ae421194a1090c22fe223357dca?tpId=37&tqId=21330&rp=1&ru=/exam/oj/ta&qru=/exam/oj/ta&sourceUrl=%2Fexam%2Foj%2Fta%3FtpId%3D37%26type%3D37%26page%3D1%26difficulty%3D3&difficulty=3&judgeStatus=undefined&tags=&title=)
+```Java
+import java.io.*;
+import java.util.*;
+public class Main{
+    public static void main(String[] args) {
+        Scanner in = new Scanner(new BufferedInputStream(System.in));
+        while (in.hasNext()) {
+            double val = in.nextDouble();
+            double left = -25.0, right = 25.0;
+            while (right - left > 1e-3) {
+                double mid = (right + left) / 2;
+                if (mid * mid * mid > val) {
+                    right = mid;
+                } else {
+                    left = mid;
+                }
+            }
+            System.out.println(String.format("%.1f", left));
+        }
+    }
+}
+```
+- 经典浮点数二分。
+- 注意用 String.format 可以实现四舍五入保留小数的效果。
+
+[HJ38 求小球落地5次后所经历的路程和第5次反弹的高度](https://www.nowcoder.com/practice/2f6f9339d151410583459847ecc98446?tpId=37&tqId=21261&rp=1&ru=/exam/oj/ta&qru=/exam/oj/ta&sourceUrl=%2Fexam%2Foj%2Fta%3FtpId%3D37%26type%3D37%26page%3D1%26difficulty%3D3&difficulty=3&judgeStatus=undefined&tags=&title=)
+```Java
+import java.io.*;
+import java.util.*;
+public class Main{
+    public static void main(String[] args) {
+        Scanner in = new Scanner(new BufferedInputStream(System.in));
+        double pre = 23.0 / 8.0;
+        while (in.hasNext()) {
+            double n = in.nextDouble();
+            System.out.println(String.format("%.6f", n * pre));
+            System.out.println(String.format("%.6f", n / 32));
+        }
+    }
+}
+```
+- 可以直接利用题目中的结论，不需要再自己算了。
