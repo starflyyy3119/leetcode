@@ -411,3 +411,37 @@ public class Main{
 }
 ```
 - 可以直接利用题目中的结论，不需要再自己算了。
+
+[HJ75 公共子串计算](oder.com/practice/98dc82c094e043ccb7e0570e5342dd1b?tpId=37&tqId=21298&rp=1&ru=/exam/oj/ta&qru=/exam/oj/ta&sourceUrl=%2Fexam%2Foj%2Fta%3FtpId%3D37%26type%3D37%26page%3D1%26difficulty%3D3&difficulty=3&judgeStatus=undefined&tags=&title=)
+```Java
+import java.io.*;
+import java.util.*;
+public class Main{
+    public static void main(String[] args) {
+        Scanner in = new Scanner(new BufferedInputStream(System.in));
+        while (in.hasNext()) {
+            String s = in.next();
+            String t = in.next();
+            System.out.println(LCS(s, t));
+        }
+    }
+    private static int LCS(String s, String t) {
+        // f[i][j] 表示s中以第 i 字符结尾，和 t中以第 j 字符结尾的最长公共子串的长度
+        int[][] f = new int[s.length() + 1][t.length() + 1];
+        int ans = 0;
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = 1; j <= t.length(); j++) {
+                if (s.charAt(i - 1) == t.charAt(j - 1)) {
+                    f[i][j] = f[i - 1][j - 1] + 1;     
+                    ans = Math.max(ans, f[i][j]);
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+- 公共子串，需要确保连续，所以必须要以**第 i，第 j**结尾。
+
+
+
